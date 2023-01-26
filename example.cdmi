@@ -1,0 +1,296 @@
+stm32g031f8p6 = ic (
+	type = mcu
+	name = STM32G031F8P6
+	vend = ST
+	pack = tssop(pins=20, a=1.2, a1=0.1, a2=1.0, b=0.2, c=0.15, d=6.5, e=6.4, e1=4.4, pitch=0.65, l=0.6, l1=1.0)
+	pins = [
+		1: PB7/PB8, IO
+		2: PB9/PC14/OSC32-IN, IO
+		3: PC15/OSC32-OUT, IO
+		4: VDD/VDDA, PWR
+		5: VSS/VSSA, PWR
+		6: PF2/NRST, IO
+		7: PA0, IO
+		8: PA1, IO
+		9: PA2, IO
+		10: PA3, IO
+		11: PA4, IO
+		12: PA5, IO
+		13: PA6, IO
+		14: PA7, IO
+		15: PB0/PB1/PB2/PA8, IO
+		16: PA11, IO
+		17: PA12, IO
+		18: PA13, IO
+		19: PA14/PA15/BOOT0, IO
+		20: PB3/PB4/PB5/PB6, IO
+	]
+)
+
+irs44273 = ic (
+	name = IRS44273
+	vend = IR
+	pack = SOT23
+	pins = [
+		1: IN, I
+		2: COM, PWR
+		3: OUT, O
+		4: OUT, O
+		5: VCC, PWR
+	]
+)
+
+ina180a1 = ic (
+	name = INA180A1
+	vend = AD
+	pack = sot23
+	pins = [
+		1: _OUT, O
+		2: GND, PWR
+		3: +, I
+		4: -, I
+		5: V+, PWR
+	]
+)
+
+irf840 = fet (
+	name = IRF840
+	vend = IR
+	pack = DPAK
+	pins = [
+		1: _GATE, PWR
+		2,4: _DRAIN, PWR
+		3: _SOURCE, PWR
+	]
+)
+
+ch330n = ic (
+	name = CH330N
+	vend = WCH
+	pack = SOP(pins=8)
+	pins = [
+		1: UD+, IO
+		2: UD-, IO
+		3: GND, PWR
+		4: RTS#, IO
+		5: VCC, PWR
+		6: TXD, O
+		7: RXD, I
+		8: V3, PWR
+	]
+)
+
+ch224k = ic (
+	name = CH224K
+	vend = WCH
+	pack = SOP(pins=10)
+	pins = [
+		1: VCC, PWR
+		2: CFG2, I
+		3: CFG3, I
+		4: DP, IO
+		5: DM, IO
+		6: CC2, IO
+		7: CC1, IO
+		8: VBUS, PWR
+		9: CFG1, I
+		10: PG, O
+		0: GND
+	]
+)
+
+l78l33 = ic(
+	name = L78L33ACD13TR
+	vend = hz
+	pack = hz
+	pins = [
+		1: OUT, PWR
+		7: GND, PWR
+		8: IN, PWR
+	]
+)
+
+usb31 = jack (
+	name = 10PF-074
+	pins = [
+		1: GND, PWR
+		2: CC1, IO
+		3: Vbus, PWR
+		4: D+, IO
+		5: SBU2, IO
+		6: D-, IO
+		7: D+, IO
+		8: CC2, IO
+		9: D-, IO
+		10: Vbus, PWR
+		11: SBU1, IO
+		12: GND, PWR
+		MH: SHIELD, PWR
+	]
+)
+
+MCU {
+	C1 = C(0603, 4.7u)
+	C2 = C(0603, 1u)
+	C3 = C(0603, 100n)
+	R1 = R(0603, 0)
+	R2 = R(0603, DNP)
+	R3 = R(0603, DNP)
+	R4 = R(0603, DNP)
+	SW1 = SW()
+	SW2 = SW()
+
+	U1 = stm32g031f8p6 (
+		.1 = USART1_RX
+		.20 = USART1_TX
+		.4 = 3V3, C1 GND, C2 GND
+		.5 = GND
+		.6 = SW2 GND, C3 GND
+		.7 = ADC_IN0
+		.8 = ADC_IN1
+		.9 = CFG1
+		.10 = CFG2
+		.11 = CFG3
+		.12 = PG
+		.15 = TIM1_CH1
+		.17 = I2C2_SDA
+		.16 = I2C2_SCL
+		.18 = SWDIO, J1.3
+		.19 = SWCLK
+		.2.3.13.14 = NC
+	)
+
+	j1 = jack (
+		.1 = 3V3
+		.2 = SW1 3V3, R1 SWCLK, R2 GND
+		.3 = SWDIO
+		.4 = GND
+	)
+
+	j2 = jack (
+		.1 = GND
+		.2 = 3V3
+		.3 = I2C2_SCL
+		.4 = I2C2_SDA
+	)
+}
+
+GATE DRIVER {
+	C1 = C(0603, 1u)
+	U1 = irs44273 (
+		.1 = TIM1_CH1
+		.2 = GND
+		.3.4 = Driver_out
+		.5 = VBUS, C1 GND
+	)
+}
+
+CURRENT-SENSE AMPLIFIER {
+	C1 = C(0603, DNP)
+	C2 = C(0603, 100n)
+	R1 = R(0603, 0)
+	R2 = R(0603, 0)
+	U1 = ina180a1 (
+		.1 = ADC_IN0
+		.2 = GND
+		.3 = R1 Rs_high, C1 _low
+		.4 = _low, Rs_low
+	)
+}
+
+RESONANT CIRCUIT {
+	C(0805, 10u) (.1 = VBUS, .2 = GND) * 3
+	C(0805, 1u)  (.1 = VBUS, .2 = GND) * 3
+	L(0805, 3.3u) (.1 = VBUS, .2 = LX)
+	C(0805, 15n) (.1 = Rs_high, .2 = LX) * 7
+	C(0805, DNP) (.1 = Rs_high, .2 = LX) * 3
+	C(0805, 15n) (.1 = LX, .2 = GND) * 7
+	C(0805, DNP) (.1 = LX, .2 = GND) * 3
+	R(0805, 0.1) (.1 = Rs_high, .2 = Rs_low)
+	J1 = jack (.1 = Rs_low, .2 = GND)
+	R1 = R(0805, 100)
+	Q1 = irf840(
+		.1 = R1 Driver_out
+		.2.4 = LX
+		.3 = GND
+	)
+}
+
+CONTROL USB & USB-UART {
+	C1 = C(0805, 100n)
+	C2 = C(0805, 100n)
+	u1 = ch330n (
+		.1 = USB1_D+
+		.2 = USB1_D-
+		.3 = GND
+		.4 = NC
+		.5 = +5V, C2 GND
+		.6 = USART1_RX
+		.7 = USART1_TX
+		.8 = +3.3V, C1 GND
+	)
+	c3 = C(0805, 1u)
+	r1 = r(0805, 5.1k)
+	r2 = r(0805, 5.1k)
+	u2 = usb31 (
+		.1.12.MH = GND
+		.2 = R2 GND
+		.8 = R1 GND
+		.4.7 = USB1_D+
+		.6.9 = USB1_D-
+		.3.10 = +5V, C3 GND
+		.5.11 = NC
+	)
+}
+
+POWER USB & PD-TRIGGER {
+	C1 = C(0805, 1u)
+	R1 = R(0805, 10k)
+	u1 = ch224k (
+		.8 = R1 VBUS
+		.1 = VDD, C1 GND
+		.4 = USB2_D+
+		.5 = USB2_D-
+		.7 = CC1
+		.8 = CC2
+		.9 = CFG1
+		.2 = CFG2
+		.3 = CFG3
+		.10 = PG
+		.0 = GND
+	)
+	c3 = C(0805, 1u)
+	r1 = r(0805, 5.1k)
+	r2 = r(0805, 5.1k)
+	u2 = usb31 (
+		.1.12.MH = GND
+		.2 = CC1
+		.8 = CC2
+		.4.7 = USB2_D+
+		.6.9 = USB2_D-
+		.3.10 = VBUS
+		.5.11 = NC
+	)
+}
+
+VOLTAGE DIVIDER {
+	R1 = R(0603, DNP)
+	R2 = R(0603, DNP)
+	ADC_IN1 R2 GND
+	ADC_IN1 R1 3V3
+}
+
+LDO&POWER SOURCE SELECT {
+	C1 = C(0603, 4.7u)
+	C2 = C(0603, 1u)
+	u1 = l78l33 (
+		.1 = 3V3, C2 GND
+		.7 = GND
+		.8 = VCC, C1 GND
+	)
+	j1 = jack (
+		.1 = VBUS
+		.2 = VCC
+		.3 = +5V
+	)
+}
