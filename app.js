@@ -13,23 +13,16 @@ Array.prototype.add = function(item) {
 parse = (cdmi) => {
 	let token = '', root = {}, stack = [root, [root]]
 	setVal = (begin) => {
-		if(token[0] == '_') {
-			token = token.substring(1)
-			stack[0].hidden = true
-		}
-		stack[0].val = token
-		token = ''
 		if(begin)
 			stack[0].type = stack[0].name ? 'nest' : 'block'
+		stack[0].val = token
+		token = ''
 	}
 	for(let i = 0; i < cdmi.length, ch = cdmi[i]; i++) {
 		switch(ch) {
 			case '=':
 			case ':':
-				if(token[0]=='.') {
-					token = token.substring(1)
-					stack[0].pin = true
-				}
+				if(token[token.length - 1] == ' ') token = token.slice(0, -1)
 				stack[0].name = token
 				token = ''
 				break
@@ -37,6 +30,7 @@ parse = (cdmi) => {
 			case '(':
 			case '[':
 			case '{':
+				if(token[token.length - 1] == ' ') token = token.slice(0, -1)
 				setVal(true)
 				stack[0].params = [{}]
 				stack.unshift(stack[0].params[0], stack[0].params)
@@ -45,7 +39,7 @@ parse = (cdmi) => {
 			case '\n':
 				if(!token) break // not an empty line
 			case ',':
-				setVal()
+				setVal(false)
 				stack.safeshift()
 				stack.unshift(stack[0].add({}))
 				break
@@ -53,7 +47,7 @@ parse = (cdmi) => {
 			case ')':
 			case ']':
 			case '}':
-				if(token) setVal()
+				if(token) setVal(false)
 				stack.safeshift(3)
 				stack.unshift(stack[0].add({}))
 				break
@@ -61,6 +55,7 @@ parse = (cdmi) => {
 			case '#': while(cdmi[i++] != '\n');
 			case '\t':
 			case ' ':
+				if(!token && token[token.length-1] != ' ')
 				break
 			
 			default: token += ch
