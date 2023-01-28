@@ -13,7 +13,8 @@ Array.prototype.add = function(item) {
 parse = (cdmi) => {
 	let token = '', root = {}, stack = [root, [root]]
 	setVal = (begin) => {
-		token = token.split(' ')
+		if((stack[0].name != 'desc') && (stack[0].type != 'block')) // BUG
+			token = token.split(' ')
 		if(begin)
 			stack[0].type = stack[0].name ? 'nest' : 'block'
 		else if(!Object.keys(stack[0]).length && stack[1][stack[1].length - 2]) {

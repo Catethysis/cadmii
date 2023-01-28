@@ -76,7 +76,7 @@ ch330n = ic (
 		1: UD+, IO
 		2: UD-, IO
 		3: GND, PWR
-		4: RTS#, IO
+		4: RTS, IO
 		5: VCC, PWR
 		6: TXD, O
 		7: RXD, I
