@@ -13,9 +13,16 @@ Array.prototype.add = function(item) {
 parse = (cdmi) => {
 	let token = '', root = {}, stack = [root, [root]]
 	setVal = (begin) => {
+		token = token.split(' ')
 		if(begin)
 			stack[0].type = stack[0].name ? 'nest' : 'block'
-		stack[0].val = token
+		else if(!Object.keys(stack[0]).length && stack[1][stack[1].length - 2]) {
+			stack[1].pop()
+			stack[1][stack[1].length - 1].val.push(token)
+			token = ''
+			return
+		}
+		stack[0].val = [token]
 		token = ''
 	}
 	for(let i = 0; i < cdmi.length, ch = cdmi[i]; i++) {

@@ -1,8 +1,10 @@
 stm32g031f8p6 = ic (
 	type = mcu
 	name = STM32G031F8P6
+	desc = MCU
 	vend = ST
 	pack = tssop(pins=20, a=1.2, a1=0.1, a2=1.0, b=0.2, c=0.15, d=6.5, e=6.4, e1=4.4, pitch=0.65, l=0.6, l1=1.0)
+	ds = https://www.st.com/resource/en/datasheet/stm32g031f8.pdf
 	pins = [
 		1: PB7/PB8, IO
 		2: PB9/PC14/OSC32-IN, IO
@@ -28,15 +30,17 @@ stm32g031f8p6 = ic (
 )
 
 irs44273 = ic (
-	name = IRS44273
+	name = IRS44273LTRPBF
+	desc = low side driver
 	vend = IR
-	pack = SOT23
+	pack = SOT23(pins=5, a=.9/1.45, a1=0/.15, a2=.9/1.3, b=.25/.5, c=0.09/.2, d=2.8/3, e=2.6/3, e1=1.5/.75, _e=0.95, _e1=1.9, l=0.35/0.55)
+	ds = https://www.infineon.com/dgdl/Infineon-IRS44273L-DS-v01_00-EN.pdf
 	pins = [
-		1: IN, I
-		2: COM, PWR
-		3: OUT, O
-		4: OUT, O
-		5: VCC, PWR
+		1: IN, I/PD, L
+		2: COM, PWR, L
+		3: OUT, O/PP, R
+		4: OUT, O/PP, R
+		5: VCC, PWR, R
 	]
 )
 
@@ -141,47 +145,47 @@ MCU {
 	SW2 = SW()
 
 	U1 = stm32g031f8p6 (
-		.1 = USART1_RX
-		.20 = USART1_TX
-		.4 = 3V3, C1 GND, C2 GND
-		.5 = GND
-		.6 = SW2 GND, C3 GND
-		.7 = ADC_IN0
-		.8 = ADC_IN1
-		.9 = CFG1
-		.10 = CFG2
-		.11 = CFG3
-		.12 = PG
-		.15 = TIM1_CH1
-		.17 = I2C2_SDA
-		.16 = I2C2_SCL
-		.18 = SWDIO, J1.3
-		.19 = SWCLK
-		.2.3.13.14 = NC
+		1: USART1_RX
+		20: USART1_TX
+		4: 3V3, C1 GND, C2 GND
+		5: GND
+		6: SW2 GND, C3 GND
+		7: ADC_IN0
+		8: ADC_IN1
+		9: CFG1
+		10: CFG2
+		11: CFG3
+		12: PG
+		15: TIM1_CH1
+		17: I2C2_SDA
+		16: I2C2_SCL
+		18: SWDIO, J1.3
+		19: SWCLK
+		2,3,13,14: NC
 	)
 
 	j1 = jack (
-		.1 = 3V3
-		.2 = SW1 3V3, R1 SWCLK, R2 GND
-		.3 = SWDIO
-		.4 = GND
+		1: 3V3
+		2: SW1 3V3, R1 SWCLK, R2 GND
+		3: SWDIO
+		4: GND
 	)
 
 	j2 = jack (
-		.1 = GND
-		.2 = 3V3
-		.3 = I2C2_SCL
-		.4 = I2C2_SDA
+		1: GND
+		2: 3V3
+		3: I2C2_SCL
+		4: I2C2_SDA
 	)
 }
 
 GATE DRIVER {
 	C1 = C(0603, 1u)
 	U1 = irs44273 (
-		.1 = TIM1_CH1
-		.2 = GND
-		.3.4 = Driver_out
-		.5 = VBUS, C1 GND
+		1: TIM1_CH1
+		2: GND
+		3,4: Driver_out
+		5: VBUS, C1 GND
 	)
 }
 
@@ -191,10 +195,10 @@ CURRENT-SENSE AMPLIFIER {
 	R1 = R(0603, 0)
 	R2 = R(0603, 0)
 	U1 = ina180a1 (
-		.1 = ADC_IN0
-		.2 = GND
-		.3 = R1 Rs_high, C1 _low
-		.4 = _low, Rs_low
+		1: ADC_IN0
+		2: GND
+		3: R1 Rs_high, C1 _low
+		4: _low, Rs_low
 	)
 }
 
@@ -210,9 +214,9 @@ RESONANT CIRCUIT {
 	J1 = jack (.1 = Rs_low, .2 = GND)
 	R1 = R(0805, 100)
 	Q1 = irf840(
-		.1 = R1 Driver_out
-		.2.4 = LX
-		.3 = GND
+		1: R1 Driver_out
+		2,4: LX
+		3: GND
 	)
 }
 
@@ -220,26 +224,26 @@ CONTROL USB & USB-UART {
 	C1 = C(0805, 100n)
 	C2 = C(0805, 100n)
 	u1 = ch330n (
-		.1 = USB1_D+
-		.2 = USB1_D-
-		.3 = GND
-		.4 = NC
-		.5 = +5V, C2 GND
-		.6 = USART1_RX
-		.7 = USART1_TX
-		.8 = +3.3V, C1 GND
+		1: USB1_D+
+		2: USB1_D-
+		3: GND
+		4: NC
+		5: +5V, C2 GND
+		6: USART1_RX
+		7: USART1_TX
+		8: +3.3V, C1 GND
 	)
 	c3 = C(0805, 1u)
 	r1 = r(0805, 5.1k)
 	r2 = r(0805, 5.1k)
 	u2 = usb31 (
-		.1.12.MH = GND
-		.2 = R2 GND
-		.8 = R1 GND
-		.4.7 = USB1_D+
-		.6.9 = USB1_D-
-		.3.10 = +5V, C3 GND
-		.5.11 = NC
+		1,12,MH: GND
+		2: R2 GND
+		8: R1 GND
+		4,7: USB1_D+
+		6,9: USB1_D-
+		3,10: +5V, C3 GND
+		5,11: NC
 	)
 }
 
@@ -247,29 +251,29 @@ POWER USB & PD-TRIGGER {
 	C1 = C(0805, 1u)
 	R1 = R(0805, 10k)
 	u1 = ch224k (
-		.8 = R1 VBUS
-		.1 = VDD, C1 GND
-		.4 = USB2_D+
-		.5 = USB2_D-
-		.7 = CC1
-		.8 = CC2
-		.9 = CFG1
-		.2 = CFG2
-		.3 = CFG3
-		.10 = PG
-		.0 = GND
+		8: R1 VBUS
+		1: VDD, C1 GND
+		4: USB2_D+
+		5: USB2_D-
+		7: CC1
+		8: CC2
+		9: CFG1
+		2: CFG2
+		3: CFG3
+		10: PG
+		0: GND
 	)
 	c3 = C(0805, 1u)
 	r1 = r(0805, 5.1k)
 	r2 = r(0805, 5.1k)
 	u2 = usb31 (
-		.1.12.MH = GND
-		.2 = CC1
-		.8 = CC2
-		.4.7 = USB2_D+
-		.6.9 = USB2_D-
-		.3.10 = VBUS
-		.5.11 = NC
+		1,12,MH: GND
+		2: CC1
+		8: CC2
+		4,7: USB2_D+
+		6,9: USB2_D-
+		3,10: VBUS
+		5,11: NC
 	)
 }
 
@@ -284,13 +288,13 @@ LDO&POWER SOURCE SELECT {
 	C1 = C(0603, 4.7u)
 	C2 = C(0603, 1u)
 	u1 = l78l33 (
-		.1 = 3V3, C2 GND
-		.7 = GND
-		.8 = VCC, C1 GND
+		1: 3V3, C2 GND
+		7: GND
+		8: VCC, C1 GND
 	)
 	j1 = jack (
-		.1 = VBUS
-		.2 = VCC
-		.3 = +5V
+		1: VBUS
+		2: VCC
+		3: +5V
 	)
 }
